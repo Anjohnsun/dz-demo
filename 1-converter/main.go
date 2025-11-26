@@ -2,16 +2,41 @@ package main
 
 import "fmt"
 
-const (
-	usdTOeur = 0.8
-	usdTOrub = 75
-	eurTorub = usdTOrub / usdTOeur
-)
+type curRate = map[string]float64
 
 func main() {
+	curs := initCurrences()
+
 	n, v1, v2 := SaveInput()
-	count, currency := Calculate(n, v1, v2)
+	count, currency := Calculate(n, v1, v2, curs)
 	fmt.Println(count, currency)
+}
+
+func initCurrences() (curs map[string]curRate) {
+	usdMap := curRate{
+		"usd": 1,
+		"eur": 0.8,
+		"rub": 70,
+	}
+
+	eurMap := curRate{
+		"usd": 1.15,
+		"eur": 1,
+		"rub": 80,
+	}
+
+	rubMap := curRate{
+		"usd": 0.014,
+		"eur": 0.012,
+		"rub": 1,
+	}
+
+	curs = map[string]curRate{
+		"usd": usdMap,
+		"eur": eurMap,
+		"rub": rubMap,
+	}
+	return curs
 }
 
 func SaveInput() (n float64, v1 string, v2 string) {
@@ -55,29 +80,6 @@ func correctCurrencyInput(s string) bool {
 	return true
 }
 
-func Calculate(n float64, v1 string, v2 string) (float64, string) {
-	if v1 == v2 {
-		return n, v2
-	}
-
-	var usdValue float64 = 0
-	switch v1 {
-	case "usd":
-		usdValue = n
-	case "eur":
-		usdValue = n / usdTOeur
-	case "rub":
-		usdValue = n / usdTOrub
-	default:
-		usdValue = 1
-	}
-
-	switch v2 {
-	case "eur":
-		return usdValue * usdTOeur, v2
-	case "rub":
-		return usdValue * usdTOrub, v2
-	default:
-		return usdValue, v2
-	}
+func Calculate(n float64, v1 string, v2 string, curs map[string]curRate) (float64, string) {
+	return curs[v1][v2], v2
 }
