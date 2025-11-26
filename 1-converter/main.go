@@ -5,14 +5,15 @@ import "fmt"
 type curRate = map[string]float64
 
 func main() {
-	curs := initCurrences()
+	curs := make(map[string]curRate)
+	initCurrences(&curs)
 
 	n, v1, v2 := SaveInput()
-	count, currency := Calculate(n, v1, v2, curs)
+	count, currency := Calculate(n, v1, v2, &curs)
 	fmt.Println(count, currency)
 }
 
-func initCurrences() (curs map[string]curRate) {
+func initCurrences(curs *map[string]curRate) {
 	usdMap := curRate{
 		"usd": 1,
 		"eur": 0.8,
@@ -31,12 +32,11 @@ func initCurrences() (curs map[string]curRate) {
 		"rub": 1,
 	}
 
-	curs = map[string]curRate{
+	*curs = map[string]curRate{
 		"usd": usdMap,
 		"eur": eurMap,
 		"rub": rubMap,
 	}
-	return curs
 }
 
 func SaveInput() (n float64, v1 string, v2 string) {
@@ -80,6 +80,6 @@ func correctCurrencyInput(s string) bool {
 	return true
 }
 
-func Calculate(n float64, v1 string, v2 string, curs map[string]curRate) (float64, string) {
-	return curs[v1][v2], v2
+func Calculate(n float64, v1 string, v2 string, curs *map[string]curRate) (float64, string) {
+	return (*curs)[v1][v2] * n, v2
 }
