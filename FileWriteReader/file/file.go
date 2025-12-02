@@ -1,8 +1,11 @@
 package file
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func ReadFile(filename string) ([]byte, error) {
@@ -33,4 +36,37 @@ func AppendFile(filename string, data []byte) error {
 
 	_, err = file.Write(data)
 	return err
+}
+
+func IsJSONFile(filename string) bool {
+	ext := strings.ToLower(filepath.Ext(filename))
+	return ext == ".json"
+}
+
+func EnsureJSONExtension(filename string) string {
+	if IsJSONFile(filename) {
+		return filename
+	}
+	return filename + ".json"
+}
+
+func ValidateJSONFile(filename string) error {
+	if !Exists(filename) {
+		return os.ErrNotExist
+	}
+	if !IsJSONFile(filename) {
+		return &InvalidExtensionError{Filename: filename, Expected: ".json"}
+	}
+	return nil
+}
+
+type InvalidExtensionError struct {
+	Filename string
+	Expected string
+}
+
+func (e *InvalidExtensionError) Error() string {
+	ext := filepath.Ext(e.Filename)
+	return fmt.Sprintf("file %s has extension %s, expected %s",
+		e.Filename, ext, e.Expected)
 }
