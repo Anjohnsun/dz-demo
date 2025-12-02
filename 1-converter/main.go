@@ -4,12 +4,24 @@ import "fmt"
 
 type curRate = map[string]float64
 
+var curs = map[string]curRate{}
+
 func main() {
-	curs := make(map[string]curRate)
+	curs = make(map[string]curRate)
 	initCurrences(&curs)
 
+	/*	n, v1, v2 := SaveInput()
+		count, currency := Calculate(n, v1, v2, &curs)
+		fmt.Println(count, currency)*/
+
+	changeOptions := map[string]func(float64, string) (float64, string){
+		"usd": toUsd,
+		"eur": toEur,
+		"rub": toRub,
+	}
 	n, v1, v2 := SaveInput()
-	count, currency := Calculate(n, v1, v2, &curs)
+	op := changeOptions[v2]
+	count, currency := op(n, v1)
 	fmt.Println(count, currency)
 }
 
@@ -82,4 +94,19 @@ func correctCurrencyInput(s string) bool {
 
 func Calculate(n float64, v1 string, v2 string, curs *map[string]curRate) (float64, string) {
 	return (*curs)[v1][v2] * n, v2
+}
+
+func toUsd(n float64, from string) (float64, string) {
+	k, _ := Calculate(n, from, "usd", &curs)
+	return k, "usd"
+}
+
+func toEur(n float64, from string) (float64, string) {
+	k, _ := toUsd(n, from)
+	return Calculate(k, from, "eur", &curs)
+}
+
+func toRub(n float64, from string) (float64, string) {
+	k, _ := toUsd(n, from)
+	return Calculate(k, from, "rub", &curs)
 }
